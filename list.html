@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Storage</title>
+</head>
+
+<body>
+    <h2>LIST FILE</h2>
+    <ul id="listFile">
+    </ul>
+    <div>
+        <input type="file" id="filetoupload" name="filetoupload">
+        <button id="submit">Send</button>
+    </div>
+
+    <script>
+        const copyLink = (file) => {
+            // alert("hello" + file);
+            const path = location.host + "/file/" + file;
+            navigator.clipboard.writeText(path)
+                .then(res => alert("Copied: " + path));
+        }
+
+        const getList = () => {
+            fetch("/list")
+                .then(res => res.json())
+                .then((data) => {
+                    var listFile = document.getElementById("listFile");
+                    listFile.innerHTML = "";
+                    data.map(file => {
+                        listFile.innerHTML += `<li><button onClick="copyLink('${file}')">Copy</button> ${file}</li>`;
+                    });
+                })
+        }
+
+
+        const input = document.getElementById('filetoupload');
+        // add event listener
+        document.getElementById("submit").addEventListener("click", () => {
+            uploadFile(input.files[0]);
+        })
+
+        const uploadFile = file => {
+            // add the file to the FormData object
+            const fd = new FormData();
+            fd.append('filetoupload', file)
+            // send `POST` request
+            fetch('/fileupload', {
+                method: 'POST',
+                body: fd
+            })
+                .then(res => res.json())
+                .then(json => {
+                    getList();
+                    alert("Sucess");
+                })
+                .catch(err => console.error(err))
+        }
+
+        getList();
+    </script>
+</body>
+
+</html>
